@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "adapter"
+version = "0.1.0"
+description = ""
+authors = ["TGRodriguez <tgrodriguez@fi.uba.ar>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.111.0"
+black = "^24.4.2"
+flakeheaven = "^3.3.0"
+pydantic-settings = "^2.3.4"
+
+[tool.black]
+line-length = 90
+
+[tool.flakeheaven]
+exclude = ["docs.py"]
+
+[tool.flakeheaven.plugins]
+# include everything but W503: line break before binary operator
+# because black does that :P
+pyflakes = ["+*"]
+pycodestyle = ["+*", "-W503"]
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
