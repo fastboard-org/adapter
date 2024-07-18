@@ -11,6 +11,7 @@ fastapi = "^0.111.0"
 black = "^24.4.2"
 flakeheaven = "^3.3.0"
 pydantic-settings = "^2.3.4"
+aiohttp = "^3.9.5"
 
 [tool.black]
 line-length = 90
