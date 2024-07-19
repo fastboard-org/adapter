@@ -1,6 +1,7 @@
 import aiohttp
 
 from fastapi.encoders import jsonable_encoder
+from errors import CustomException, ERR_INTERNAL
 
 
 async def make_request(url, headers, method, body={}, params={}):
@@ -24,6 +25,9 @@ async def make_request(url, headers, method, body={}, params={}):
                     "headers": dict(response.headers),
                 }
                 return result
-        except Exception:
-            # Add a custom error message
-            pass
+        except Exception as e:
+            raise CustomException(
+                500,
+                ERR_INTERNAL,
+                f"An error ocurred while trying to make the request: {str(e)}",
+            )
