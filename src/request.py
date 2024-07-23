@@ -18,7 +18,10 @@ async def make_request(url, headers, method, body={}, params={}):
                 url,
                 json=json_compatible_body,
             ) as response:
-                json_body = await response.json()
+                if response.content_type == "application/json":
+                    json_body = await response.json()
+                else:
+                    json_body = await response.text()
                 result = {
                     "body": json_body,
                     "status_code": response.status,
