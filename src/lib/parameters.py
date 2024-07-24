@@ -1,3 +1,6 @@
+import ast
+
+
 def replace_parameters_in_string(string, parameters):
     for parameter, parameter_value in parameters.items():
         parameter_to_replace = "{{" + parameter + "}}"
@@ -8,7 +11,12 @@ def replace_parameters_in_string(string, parameters):
 
 def replace_parameters(obj, parameters):
     if isinstance(obj, str):
-        return replace_parameters_in_string(obj, parameters)
+        replaced_string = replace_parameters_in_string(obj, parameters)
+        try:
+            eval = ast.literal_eval(replaced_string)
+            return eval
+        except (ValueError, SyntaxError):
+            return replaced_string
     elif isinstance(obj, list):
         return [replace_parameters(item, parameters) for item in obj]
     elif isinstance(obj, dict):
