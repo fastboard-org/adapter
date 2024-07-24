@@ -8,6 +8,7 @@ from fastapi.responses import (
 ERR_INTERNAL = "A0"
 ERR_BAD_REQUEST = "A1"
 ERR_UNSUPPORTED_QUERY_TYPE = "A2"
+ERR_QUERY_EXECUTION = "A3"
 
 
 class CustomException(HTTPException):
