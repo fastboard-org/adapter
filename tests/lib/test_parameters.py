@@ -44,3 +44,35 @@ def test_mixed_parameters_on_list_of_dicts():
         {"ditto": "normal"},
         {"normal": "ditto"},
     ]
+
+
+def test_mixed_parameters_on_nested_dicts():
+    parameters = {
+        "name": "ditto",
+        "type": "normal",
+        "number": 25,
+        "some_key": "key",
+        "some_dict": {"key": "value"},
+        "is_cool": True,
+        "moves": ["transform", "struggle"],
+    }
+    dictionary = {
+        "{{name}}": {
+            "type": "{{type}}",
+            "health": "{{number}}",
+            "health_in_string": "something/{{number}}",
+            "{{some_key}}": "{{some_dict}}",
+        },
+        "is_cool": "{{is_cool}}",
+        "moves": "{{moves}}",
+    }
+    assert replace_parameters(dictionary, parameters) == {
+        "ditto": {
+            "type": "normal",
+            "health": 25,
+            "health_in_string": "something/25",
+            "key": {"key": "value"},
+        },
+        "is_cool": True,
+        "moves": ["transform", "struggle"],
+    }
