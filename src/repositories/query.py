@@ -36,32 +36,6 @@ class QueryRepository:
             description=f"Unsupported query type: {query.type}",
         )
 
-    # async def execute_api_query(self, query: Query):
-    #     parameters = {**query.variables, **query.parameters}
-    #     # Fill header parameters
-    #     headers = {}
-    #     for key, value in query.headers.items():
-    #         replaced_key = replace_parameters(key, parameters)
-    #         replaced_value = replace_parameters(value, parameters)
-    #         headers[replaced_key] = replaced_value
-
-    #     # Fill body parameters
-    #     body = {}
-    #     for key, value in query.body.items():
-    #         replaced_key = replace_parameters(key, parameters)
-    #         replaced_value = replace_parameters(value, parameters)
-    #         body[replaced_key] = replaced_value
-
-    #     # Fill path parameters
-    #     path = replace_parameters(query.path, parameters)
-
-    #     url = query.credentials["main_url"] + path
-
-    #     response = await make_request(
-    #         url=url, headers=headers, method=query.method, body=body
-    #     )
-    #     return response
-
     async def execute_api_query(self, query: Query):
         parameters = {**query.variables, **query.parameters}
         used_parameters = set()
@@ -91,7 +65,7 @@ class QueryRepository:
             raise CustomException(
                 status_code=400,
                 error_code=ERR_MISSING_PARAMETERS,
-                description=f"Unused parameters in input: {unused_parameters}",
+                description=f"Unused parameters in input",
             )
 
         # Validate that all placeholders were replaced
@@ -112,7 +86,7 @@ class QueryRepository:
             raise CustomException(
                 status_code=400,
                 error_code=ERR_MISSING_PARAMETERS,
-                description=f"Missing parameters in input: {missing_parameters}",
+                description=f"Missing parameters in input",
             )
 
         response = await make_request(
