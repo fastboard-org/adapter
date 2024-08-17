@@ -23,6 +23,9 @@ class CustomException(HTTPException):
         self.error_code = error_code
         self.description = description
 
+    def __str__(self) -> str:
+        return f"{self.description}"
+
     def create_json_response(
         self,
     ):
