@@ -65,7 +65,7 @@ class QueryRepository:
             raise CustomException(
                 status_code=400,
                 error_code=ERR_MISSING_PARAMETERS,
-                description=f"Unused parameters in input",
+                description=f"Unused parameters in input: {unused_parameters}",
             )
 
         # Validate that all placeholders were replaced
@@ -86,7 +86,7 @@ class QueryRepository:
             raise CustomException(
                 status_code=400,
                 error_code=ERR_MISSING_PARAMETERS,
-                description=f"Missing parameters in input",
+                description=f"Missing parameters in input: {missing_parameters}",
             )
 
         response = await make_request(
