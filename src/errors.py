@@ -9,6 +9,7 @@ ERR_INTERNAL = "A0"
 ERR_BAD_REQUEST = "A1"
 ERR_UNSUPPORTED_QUERY_TYPE = "A2"
 ERR_QUERY_EXECUTION = "A3"
+ERR_BAD_PARAMETERS = "A4"
 
 
 class CustomException(HTTPException):
@@ -21,6 +22,9 @@ class CustomException(HTTPException):
         self.status_code = status_code
         self.error_code = error_code
         self.description = description
+
+    def __str__(self) -> str:
+        return f"{self.description}"
 
     def create_json_response(
         self,

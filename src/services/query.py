@@ -1,5 +1,5 @@
 from repositories.query import QueryRepository
-from errors import CustomException, ERR_QUERY_EXECUTION
+from errors import CustomException
 from models.query import Query
 from schemas.rest_api import ExecuteQueryRequest, PreviewQueryRequest
 
@@ -49,15 +49,7 @@ class QueryService:
             headers=headers,
             body=body,
         )
-        try:
-            response = await self.repository.execute_query(new_query)
-            return response
-        except Exception as e:
-            raise CustomException(
-                status_code=500,
-                error_code=ERR_QUERY_EXECUTION,
-                description=f"Error executing query: {str(e)}",
-            )
+        return await self.repository.execute_query(new_query)
 
     async def preview_query(self, connection_id: str, query: PreviewQueryRequest):
         connection = await self.repository.get_connection_by_id(connection_id)
@@ -78,12 +70,4 @@ class QueryService:
             headers=query.headers,
             body=query.body,
         )
-        try:
-            response = await self.repository.execute_query(new_query)
-            return response
-        except Exception as e:
-            raise CustomException(
-                status_code=500,
-                error_code=ERR_QUERY_EXECUTION,
-                description=f"Error executing query: {str(e)}",
-            )
+        return await self.repository.execute_query(new_query)
