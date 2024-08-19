@@ -1,7 +1,7 @@
 from request import make_request
 from models.query import Query
 from lib.parameters import replace_parameters
-from errors import CustomException, ERR_UNSUPPORTED_QUERY_TYPE, ERR_MISSING_PARAMETERS
+from errors import CustomException, ERR_UNSUPPORTED_QUERY_TYPE, ERR_BAD_PARAMETERS
 import re
 
 
@@ -64,8 +64,8 @@ class QueryRepository:
         if unused_parameters:
             raise CustomException(
                 status_code=400,
-                error_code=ERR_MISSING_PARAMETERS,
-                description=f"Unused parameters in input",
+                error_code=ERR_BAD_PARAMETERS,
+                description=f"Unused parameters in input: {unused_parameters}",
             )
 
         # Validate that all placeholders were replaced
@@ -85,8 +85,8 @@ class QueryRepository:
         if missing_parameters:
             raise CustomException(
                 status_code=400,
-                error_code=ERR_MISSING_PARAMETERS,
-                description=f"Missing parameters in input",
+                error_code=ERR_BAD_PARAMETERS,
+                description=f"Missing parameters in input: {missing_parameters}",
             )
 
         response = await make_request(
