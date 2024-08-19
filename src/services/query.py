@@ -1,5 +1,5 @@
 from repositories.query import QueryRepository
-from errors import CustomException, ERR_QUERY_EXECUTION
+from errors import CustomException
 from models.query import Query
 from schemas.rest_api import ExecuteQueryRequest, PreviewQueryRequest
 
