@@ -16,6 +16,7 @@ async def make_request(url, headers, method, body={}, params={}):
             async with session.request(
                 method,
                 url,
+                headers=headers,
                 json=json_compatible_body,
             ) as response:
                 if response.content_type == "application/json":
