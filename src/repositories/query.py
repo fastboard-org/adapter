@@ -61,6 +61,8 @@ class QueryRepository:
 
         # Validate that all parameters were used
         unused_parameters = set(parameters.keys()) - used_parameters
+        if "token" in unused_parameters:
+            unused_parameters.remove("token")
         if unused_parameters:
             raise CustomException(
                 status_code=400,
@@ -82,6 +84,8 @@ class QueryRepository:
         ]
 
         missing_parameters = set(all_placeholders) - set(parameters.keys())
+        if "token" in missing_parameters:
+            missing_parameters.remove("token")
         if missing_parameters:
             raise CustomException(
                 status_code=400,
