@@ -19,15 +19,17 @@ async def execute_query(
     connection_id: str,
     query_id: str,
     parameters: ExecuteQueryRequest,
+    user_id: str,
     service: QueryService = Depends(get_query_service),
 ):
-    return await service.execute_query(connection_id, query_id, parameters)
+    return await service.execute_query(connection_id, query_id, parameters, user_id)
 
 
 @AdapterRouter.post("/{connection_id}/preview")
 async def preview_query(
     connection_id: str,
     query: PreviewQueryRequest,
+    user_id: str,
     service: QueryService = Depends(get_query_service),
 ):
-    return await service.preview_query(connection_id, query)
+    return await service.preview_query(connection_id, query, user_id)

@@ -13,13 +13,13 @@ class QueryRepository:
         self.url = url
         self.version = version
 
-    async def get_by_id(self, query_id: str):
-        url = self.url + f"/v{self.version}/queries/{query_id}"
+    async def get_by_id(self, query_id: str, user_id: str):
+        url = self.url + f"/v{self.version}/queries/{query_id}?user_id={user_id}"
         query_response = await make_request(url=url, headers={}, method="GET")
         return query_response
 
-    async def get_connection_by_id(self, connection_id: str):
-        url = self.url + f"/v{self.version}/connections/{connection_id}"
+    async def get_connection_by_id(self, connection_id: str, user_id: str):
+        url = self.url + f"/v{self.version}/connections/{connection_id}?user_id={user_id}"
         connection_response = await make_request(url=url, headers={}, method="GET")
         return connection_response
 

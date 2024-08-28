@@ -9,9 +9,13 @@ class QueryService:
         self.repository = repository
 
     async def execute_query(
-        self, connection_id: str, query_id: str, parameters: ExecuteQueryRequest
+        self,
+        connection_id: str,
+        query_id: str,
+        parameters: ExecuteQueryRequest,
+        user_id: str,
     ):
-        query = await self.repository.get_by_id(query_id)
+        query = await self.repository.get_by_id(query_id, user_id)
         if query["status_code"] != 200:
             error = query["body"]["error"]
             raise CustomException(
@@ -19,9 +23,7 @@ class QueryService:
                 error_code=error["code"],
                 description=error["description"],
             )
-        connection = await self.repository.get_connection_by_id(
-            connection_id=connection_id
-        )
+        connection = await self.repository.get_connection_by_id(connection_id, user_id)
         if connection["status_code"] != 200:
             error = connection["body"]["error"]
             raise CustomException(
@@ -51,8 +53,10 @@ class QueryService:
         )
         return await self.repository.execute_query(new_query)
 
-    async def preview_query(self, connection_id: str, query: PreviewQueryRequest):
-        connection = await self.repository.get_connection_by_id(connection_id)
+    async def preview_query(
+        self, connection_id: str, query: PreviewQueryRequest, user_id: str
+    ):
+        connection = await self.repository.get_connection_by_id(connection_id, user_id)
         if connection["status_code"] != 200:
             error = connection["body"]["error"]
             raise CustomException(
