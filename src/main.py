@@ -13,4 +13,4 @@ app.add_exception_handler(CustomException, handle_custom_exception)
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host=settings.app_host, port=settings.app_port)
+    uvicorn.run(app, host=settings.APP_HOST, port=settings.APP_PORT)

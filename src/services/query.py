@@ -13,21 +13,12 @@ class QueryService:
         connection_id: str,
         query_id: str,
         parameters: ExecuteQueryRequest,
-        user_id: str,
     ):
-        query = await self.repository.get_by_id(query_id, user_id)
+        query = await self.repository.get_by_id(query_id)
         if query["status_code"] != 200:
             error = query["body"]["error"]
             raise CustomException(
                 status_code=query["status_code"],
-                error_code=error["code"],
-                description=error["description"],
-            )
-        connection = await self.repository.get_connection_by_id(connection_id, user_id)
-        if connection["status_code"] != 200:
-            error = connection["body"]["error"]
-            raise CustomException(
-                status_code=connection["status_code"],
                 error_code=error["code"],
                 description=error["description"],
             )
@@ -42,9 +33,9 @@ class QueryService:
             else {}
         )
         new_query = Query(
-            type=connection["body"]["type"],
-            credentials=connection["body"]["credentials"],
-            variables=connection["body"]["variables"],
+            type=query["body"]["connection"]["type"],
+            credentials=query["body"]["connection"]["credentials"],
+            variables=query["body"]["connection"]["variables"],
             method=query["body"]["metadata"]["method"],
             parameters=parameters.parameters,
             path=query["body"]["metadata"]["path"],
@@ -53,10 +44,8 @@ class QueryService:
         )
         return await self.repository.execute_query(new_query)
 
-    async def preview_query(
-        self, connection_id: str, query: PreviewQueryRequest, user_id: str
-    ):
-        connection = await self.repository.get_connection_by_id(connection_id, user_id)
+    async def preview_query(self, connection_id: str, query: PreviewQueryRequest):
+        connection = await self.repository.get_connection_by_id(connection_id)
         if connection["status_code"] != 200:
             error = connection["body"]["error"]
             raise CustomException(

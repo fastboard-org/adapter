@@ -3,6 +3,7 @@ from models.query import Query
 from lib.parameters import replace_parameters
 from errors import CustomException, ERR_UNSUPPORTED_QUERY_TYPE, ERR_BAD_PARAMETERS
 import re
+from configs.settings import settings
 
 
 class QueryRepository:
@@ -13,14 +14,18 @@ class QueryRepository:
         self.url = url
         self.version = version
 
-    async def get_by_id(self, query_id: str, user_id: str):
-        url = self.url + f"/v{self.version}/queries/{query_id}?user_id={user_id}"
-        query_response = await make_request(url=url, headers={}, method="GET")
+    async def get_by_id(self, query_id: str):
+        url = self.url + f"/v{self.version}/queries/{query_id}"
+        query_response = await make_request(
+            url=url, headers={"api_key": settings.API_KEY}, method="GET"
+        )
         return query_response
 
-    async def get_connection_by_id(self, connection_id: str, user_id: str):
-        url = self.url + f"/v{self.version}/connections/{connection_id}?user_id={user_id}"
-        connection_response = await make_request(url=url, headers={}, method="GET")
+    async def get_connection_by_id(self, connection_id: str):
+        url = self.url + f"/v{self.version}/connections/{connection_id}"
+        connection_response = await make_request(
+            url=url, headers={"api_key": settings.API_KEY}, method="GET"
+        )
         return connection_response
 
     async def execute_query(self, query: Query):
