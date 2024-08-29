@@ -9,7 +9,7 @@ AdapterRouter = APIRouter(prefix="/v1/adapter", tags=["adapter"])
 
 
 def get_query_service():
-    repository = QueryRepository(url=settings.dashboards_service_url, version="1")
+    repository = QueryRepository(url=settings.DASHBOARDS_SERVICE_URL, version="1")
     service = QueryService(repository)
     return service
 
@@ -19,17 +19,15 @@ async def execute_query(
     connection_id: str,
     query_id: str,
     parameters: ExecuteQueryRequest,
-    user_id: str,
     service: QueryService = Depends(get_query_service),
 ):
-    return await service.execute_query(connection_id, query_id, parameters, user_id)
+    return await service.execute_query(connection_id, query_id, parameters)
 
 
 @AdapterRouter.post("/{connection_id}/preview")
 async def preview_query(
     connection_id: str,
     query: PreviewQueryRequest,
-    user_id: str,
     service: QueryService = Depends(get_query_service),
 ):
-    return await service.preview_query(connection_id, query, user_id)
+    return await service.preview_query(connection_id, query)
