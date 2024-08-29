@@ -14,7 +14,7 @@ def get_query_service():
     return service
 
 
-@AdapterRouter.post("/{connection_id}/execute/{query_id}")
+@AdapterRouter.post("/execute/{query_id}")
 async def execute_query(
     connection_id: str,
     query_id: str,
