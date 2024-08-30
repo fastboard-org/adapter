@@ -29,6 +29,7 @@ class CustomException(HTTPException):
     def create_json_response(
         self,
     ):
+        print(f"Error: {self.error_code} - {self.description}")
         return JSONResponse(
             status_code=self.status_code,
             content={
@@ -51,6 +52,7 @@ def handle_validation_error(_, exc) -> JSONResponse:
         field_name = error["loc"]
         error_messages.append(f"{field_name}: {error['msg']}")
     message = ", ".join(error_messages)
+    print(f"Validation error: {message}")
     return JSONResponse(
         status_code=400,
         content={
