@@ -14,14 +14,13 @@ def get_query_service():
     return service
 
 
-@AdapterRouter.post("/{connection_id}/execute/{query_id}")
+@AdapterRouter.post("/execute/{query_id}")
 async def execute_query(
-    connection_id: str,
     query_id: str,
     parameters: ExecuteQueryRequest,
     service: QueryService = Depends(get_query_service),
 ):
-    return await service.execute_query(connection_id, query_id, parameters)
+    return await service.execute_query(query_id, parameters)
 
 
 @AdapterRouter.post("/{connection_id}/preview")
