@@ -10,7 +10,6 @@ class QueryService:
 
     async def execute_query(
         self,
-        connection_id: str,
         query_id: str,
         parameters: ExecuteQueryRequest,
     ):
