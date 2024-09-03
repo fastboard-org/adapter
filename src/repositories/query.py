@@ -1,5 +1,6 @@
-from request import make_request
-from models.query import Query
+from connections.api_request import make_request
+from connections.mongo_connection import execute_query
+from models.query import Query, ApiQuery, MongoQuery
 from lib.parameters import replace_parameters
 from errors import CustomException, ERR_UNSUPPORTED_QUERY_TYPE, ERR_BAD_PARAMETERS
 import re
@@ -32,7 +33,7 @@ class QueryRepository:
         if query.type == "REST":
             return await self.execute_api_query(query)
         if query.type == "MONGO":
-            return None
+            return await self.execute_mongo_query(query)
         if query.type == "POSTGRES":
             return None
         raise CustomException(
@@ -41,7 +42,7 @@ class QueryRepository:
             description=f"Unsupported query type: {query.type}",
         )
 
-    async def execute_api_query(self, query: Query):
+    async def execute_api_query(self, query: ApiQuery):
         parameters = {**query.variables, **query.parameters}
         used_parameters = set()
 
@@ -61,6 +62,7 @@ class QueryRepository:
 
         # Fill path parameters
         path = replace_parameters(query.path, parameters, used_parameters)
+        print(query.path, path)
 
         url = query.credentials["main_url"] + path
 
@@ -102,3 +104,12 @@ class QueryRepository:
             url=url, headers=headers, method=query.method, body=body
         )
         return response
+
+    async def execute_mongo_query(self, query: MongoQuery):
+        return await execute_query(
+            query.credentials["main_url"],
+            query.collection,
+            query.method,
+            query.filter_body,
+            query.update_body,
+        )
