@@ -106,10 +106,46 @@ class QueryRepository:
         return response
 
     async def execute_mongo_query(self, query: MongoQuery):
-        return await execute_query(
-            query.credentials["main_url"],
-            query.collection,
-            query.method,
-            query.filter_body,
-            query.update_body,
+        parameters = {**query.variables, **query.parameters}
+        used_parameters = set()
+
+        # Fill filter parameters
+        filter_body = replace_parameters(query.filter_body, parameters, used_parameters)
+
+        # Fill update parameters
+        update_body = replace_parameters(query.update_body, parameters, used_parameters)
+
+        # Validate that all parameters were used
+        unused_parameters = set(parameters.keys()) - used_parameters
+        if "token" in unused_parameters:
+            unused_parameters.remove("token")
+        if unused_parameters:
+            raise CustomException(
+                status_code=400,
+                error_code=ERR_BAD_PARAMETERS,
+                description=f"Unused parameters in input: {unused_parameters}",
+            )
+
+        # Validate that all placeholders were replaced
+        all_placeholders = re.findall(
+            r"\{\{(.*?)\}\}", str(filter_body) + str(update_body)
         )
+        missing_parameters = set(all_placeholders) - set(parameters.keys())
+        if "token" in missing_parameters:
+            missing_parameters.remove("token")
+        if missing_parameters:
+            raise CustomException(
+                status_code=400,
+                error_code=ERR_BAD_PARAMETERS,
+                description=f"Missing parameters in input: {missing_parameters}",
+            )
+
+        response = await execute_query(
+            connection_string=query.credentials["main_url"],
+            collection=query.collection,
+            method=query.method,
+            filter_body=filter_body,
+            update_body=update_body,
+        )
+
+        return response
