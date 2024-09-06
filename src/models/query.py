@@ -10,10 +10,10 @@ class ApiQuery(Query):
     def __init__(
         self,
         type: str,
+        credentials: dict,
         variables: dict,
         parameters: dict,
         method: str,
-        credentials: dict,
         path: str,
         headers: dict,
         body: dict,
