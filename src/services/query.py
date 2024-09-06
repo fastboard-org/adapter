@@ -98,7 +98,7 @@ class QueryService:
                 raise CustomException(
                     status_code=400,
                     error_code=ERR_BAD_PARAMETERS,
-                    description=f"Error creating API query from request parameters: {e}",
+                    description=f"Error creating API query from parameters: {e}",
                 )
 
         elif type == "MONGO":
@@ -117,7 +117,7 @@ class QueryService:
                 raise CustomException(
                     status_code=400,
                     error_code=ERR_BAD_PARAMETERS,
-                    description=f"Error creating Mongo query from request parameters: {e}",
+                    description=f"Error creating Mongo query from parameters: {e}",
                 )
         else:
             raise CustomException(

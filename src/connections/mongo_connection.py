@@ -28,7 +28,7 @@ async def execute_query(
         "deleteMany": db.delete_many,
     }
     print(
-        f"Executing {method} on {collection} with filter {filter_body} and update {update_body}"
+        f"{method} on {collection}\n Filter: {filter_body}\n Update: {update_body}"
     )
     res = switcher.get(method)(filter_body, update_body)
     if res:
