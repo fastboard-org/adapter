@@ -1,6 +1,6 @@
 from repositories.query import QueryRepository
-from errors import CustomException, ERR_UNSUPPORTED_QUERY_TYPE
-from models.query import Query, ApiQuery, MongoQuery
+from errors import CustomException, ERR_UNSUPPORTED_QUERY_TYPE, ERR_BAD_PARAMETERS
+from models.query import ApiQuery, MongoQuery
 from schemas.rest_api import ExecuteQueryRequest, PreviewQueryRequest
 
 
@@ -79,15 +79,51 @@ class QueryService:
             )
 
         type = connection["body"]["type"]
+        credentials = connection["body"]["credentials"]
+        variables = connection["body"]["variables"]
+
         if type == "REST":
-            new_query = ApiQuery(
-                type=type,
-                credentials=connection["body"]["credentials"],
-                variables=connection["body"]["variables"],
-                method=query.method,
-                parameters=query.parameters,
-                path=query.path,
-                headers=query.headers,
-                body=query.body,
+            try:
+                new_query = ApiQuery(
+                    type=type,
+                    credentials=credentials,
+                    variables=variables,
+                    method=query.connection_metadata.method,
+                    parameters=query.parameters,
+                    path=query.connection_metadata.path,
+                    headers=query.connection_metadata.headers,
+                    body=query.connection_metadata.body,
+                )
+            except Exception as e:
+                raise CustomException(
+                    status_code=400,
+                    error_code=ERR_BAD_PARAMETERS,
+                    description=f"Error creating API query from request parameters: {e}",
+                )
+
+        elif type == "MONGO":
+            try:
+                new_query = MongoQuery(
+                    type=type,
+                    credentials=credentials,
+                    variables=variables,
+                    parameters=query.parameters,
+                    method=query.connection_metadata.method,
+                    collection=query.connection_metadata.collection,
+                    filter_body=query.connection_metadata.filter_body,
+                    update_body=query.connection_metadata.update_body,
+                )
+            except Exception as e:
+                raise CustomException(
+                    status_code=400,
+                    error_code=ERR_BAD_PARAMETERS,
+                    description=f"Error creating Mongo query from request parameters: {e}",
+                )
+        else:
+            raise CustomException(
+                status_code=400,
+                error_code=ERR_UNSUPPORTED_QUERY_TYPE,
+                description=f"Unsupported query type: {type}",
             )
+
         return await self.repository.execute_query(new_query)
