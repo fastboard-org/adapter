@@ -2,7 +2,12 @@ from connections.api_request import make_request
 from connections.mongo_connection import execute_query
 from models.query import Query, ApiQuery, MongoQuery
 from lib.parameters import replace_parameters
-from errors import CustomException, ERR_UNSUPPORTED_QUERY_TYPE, ERR_BAD_PARAMETERS
+from errors import (
+    CustomException,
+    ERR_UNSUPPORTED_QUERY_TYPE,
+    ERR_BAD_PARAMETERS,
+    ERR_INTERNAL,
+)
 import re
 from configs.settings import settings
 
@@ -140,12 +145,19 @@ class QueryRepository:
                 description=f"Missing parameters in input: {missing_parameters}",
             )
 
-        response = await execute_query(
-            connection_string=query.credentials["main_url"],
-            collection=query.collection,
-            method=query.method,
-            filter_body=filter_body,
-            update_body=update_body,
-        )
+        try:
+            response = await execute_query(
+                connection_string=query.credentials["main_url"],
+                collection=query.collection,
+                method=query.method,
+                filter_body=filter_body,
+                update_body=update_body,
+            )
 
-        return response
+            return response
+        except Exception as e:
+            raise CustomException(
+                status_code=500,
+                error_code=ERR_INTERNAL,
+                description=f"Error while executing query: {str(e)}",
+            )
