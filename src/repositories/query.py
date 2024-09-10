@@ -1,7 +1,13 @@
-from request import make_request
-from models.query import Query
+from connections.api_request import make_request
+from connections.mongo_connection import execute_query
+from models.query import Query, ApiQuery, MongoQuery
 from lib.parameters import replace_parameters
-from errors import CustomException, ERR_UNSUPPORTED_QUERY_TYPE, ERR_BAD_PARAMETERS
+from errors import (
+    CustomException,
+    ERR_UNSUPPORTED_QUERY_TYPE,
+    ERR_BAD_PARAMETERS,
+    ERR_INTERNAL,
+)
 import re
 from configs.settings import settings
 
@@ -32,7 +38,7 @@ class QueryRepository:
         if query.type == "REST":
             return await self.execute_api_query(query)
         if query.type == "MONGO":
-            return None
+            return await self.execute_mongo_query(query)
         if query.type == "POSTGRES":
             return None
         raise CustomException(
@@ -41,7 +47,7 @@ class QueryRepository:
             description=f"Unsupported query type: {query.type}",
         )
 
-    async def execute_api_query(self, query: Query):
+    async def execute_api_query(self, query: ApiQuery):
         parameters = {**query.variables, **query.parameters}
         used_parameters = set()
 
@@ -61,6 +67,7 @@ class QueryRepository:
 
         # Fill path parameters
         path = replace_parameters(query.path, parameters, used_parameters)
+        print(query.path, path)
 
         url = query.credentials["main_url"] + path
 
@@ -102,3 +109,55 @@ class QueryRepository:
             url=url, headers=headers, method=query.method, body=body
         )
         return response
+
+    async def execute_mongo_query(self, query: MongoQuery):
+        parameters = {**query.variables, **query.parameters}
+        used_parameters = set()
+
+        # Fill filter parameters
+        filter_body = replace_parameters(query.filter_body, parameters, used_parameters)
+
+        # Fill update parameters
+        update_body = replace_parameters(query.update_body, parameters, used_parameters)
+
+        # Validate that all parameters were used
+        unused_parameters = set(parameters.keys()) - used_parameters
+        if "token" in unused_parameters:
+            unused_parameters.remove("token")
+        if unused_parameters:
+            raise CustomException(
+                status_code=400,
+                error_code=ERR_BAD_PARAMETERS,
+                description=f"Unused parameters in input: {unused_parameters}",
+            )
+
+        # Validate that all placeholders were replaced
+        all_placeholders = re.findall(
+            r"\{\{(.*?)\}\}", str(filter_body) + str(update_body)
+        )
+        missing_parameters = set(all_placeholders) - set(parameters.keys())
+        if "token" in missing_parameters:
+            missing_parameters.remove("token")
+        if missing_parameters:
+            raise CustomException(
+                status_code=400,
+                error_code=ERR_BAD_PARAMETERS,
+                description=f"Missing parameters in input: {missing_parameters}",
+            )
+
+        try:
+            response = await execute_query(
+                connection_string=query.credentials["main_url"],
+                collection=query.collection,
+                method=query.method,
+                filter_body=filter_body,
+                update_body=update_body,
+            )
+
+            return response
+        except Exception as e:
+            raise CustomException(
+                status_code=500,
+                error_code=ERR_INTERNAL,
+                description=f"Error while executing query: {str(e)}",
+            )
