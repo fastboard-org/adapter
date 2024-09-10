@@ -47,7 +47,7 @@ async def execute_query(
     db = get_mongo_client(connection_string).get_database()[collection]
 
     if method == "aggregate":
-        res = list(db.aggregate(pipeline=[filter_body]))
+        res = list(db.aggregate(pipeline=filter_body))
     elif method == "count":
         res = db.count_documents(filter_body)
     elif method == "distinct":
@@ -65,21 +65,13 @@ async def execute_query(
     elif method == "insertOne":
         res = db.insert_one(filter_body).inserted_id
     elif method == "insertMany":
-        res = list(db.insert_many(filter_body))
+        res = db.insert_many(filter_body).inserted_ids
     elif method == "updateOne":
         modified_count = db.update_one(filter_body, update_body).modified_count
-        if modified_count == 0:
-            res = {}
-        else:
-            document = db.find_one(filter_body)
-            res = document
+        res = {"modified_count": modified_count}
     elif method == "updateMany":
         modified_count = db.update_many(filter_body, update_body).modified_count
-        if modified_count == 0:
-            res = {}
-        else:
-            documents = list(db.find(filter_body))
-            res = documents
+        res = {"modified_count": modified_count}
     elif method == "deleteOne":
         deleted_count = db.delete_one(filter_body).deleted_count
         res = {"deleted_count": deleted_count}
@@ -97,7 +89,7 @@ async def execute_query(
     elif isinstance(res, list):
         for item in res:
             if isinstance(item, ObjectId):
-                item = str(item)
+                res[res.index(item)] = str(item)
             if isinstance(item, dict):
                 for k, v in item.items():
                     if isinstance(v, ObjectId):
