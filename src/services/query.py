@@ -1,7 +1,7 @@
 from repositories.query import QueryRepository
 from errors import CustomException, ERR_UNSUPPORTED_QUERY_TYPE, ERR_BAD_PARAMETERS
 from models.query import ApiQuery, MongoQuery
-from schemas.rest_api import ExecuteQueryRequest, PreviewQueryRequest
+from schemas.query import ExecuteQueryRequest, PreviewQueryRequest
 
 
 class QueryService:

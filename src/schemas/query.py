@@ -16,8 +16,8 @@ class ApiMetadata(BaseModel):
 class MongoMetadata(BaseModel):
     method: str
     collection: str
-    filter_body: dict
-    update_body: dict
+    filter_body: Union[dict, list, str]
+    update_body: Union[dict, list, str]
 
 
 class PreviewQueryRequest(BaseModel):

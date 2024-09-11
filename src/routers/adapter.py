@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from repositories.query import QueryRepository
 from configs.settings import settings
 from services.query import QueryService
-from schemas.rest_api import ExecuteQueryRequest, PreviewQueryRequest
+from schemas.query import ExecuteQueryRequest, PreviewQueryRequest
 
 
 AdapterRouter = APIRouter(prefix="/v1/adapter", tags=["adapter"])
