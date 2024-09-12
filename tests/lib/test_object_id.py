@@ -7,7 +7,7 @@ def test_replace_empty_dict():
 
 
 def test_replace_objectid_strings_on_string():
-    string = "ObjectId('5f6c6f6e6e656374696f6f6e')"   
+    string = "ObjectId('5f6c6f6e6e656374696f6f6e')"
     replaced_string = replace_objectid_strings(string)
     assert replaced_string == ObjectId("5f6c6f6e6e656374696f6f6e")
 
@@ -35,6 +35,7 @@ def test_replace_objectid_strings_on_dict():
         "name": "ditto",
     }
 
+
 def test_replace_objectid_strings_on_nested_dict():
     dictionary = {
         "id": "ObjectId('5f6c6f6e6e656374696f6f6e')",
@@ -53,6 +54,7 @@ def test_replace_objectid_strings_on_nested_dict():
             "name": "eevee",
         },
     }
+
 
 def test_replace_objectid_string_on_nested_dict_with_objectid_as_key_and_value():
     dictionary = {
@@ -74,5 +76,3 @@ def test_replace_objectid_string_on_nested_dict_with_objectid_as_key_and_value()
         },
         ObjectId("5f6c6f6e6e656374696f6f6f"): [ObjectId("5f6c6f6e6e656374696f6f6e")],
     }
-
-
