@@ -10,6 +10,7 @@ from errors import (
 )
 import re
 from configs.settings import settings
+from lib.object_id import replace_objectid_strings
 
 
 class QueryRepository:
@@ -150,8 +151,8 @@ class QueryRepository:
                 connection_string=query.credentials["main_url"],
                 collection=query.collection,
                 method=query.method,
-                filter_body=filter_body,
-                update_body=update_body,
+                filter_body=replace_objectid_strings(filter_body),
+                update_body=replace_objectid_strings(update_body),
             )
 
             return response
