@@ -95,4 +95,4 @@ async def execute_query(
                     if isinstance(v, ObjectId):
                         item[k] = str(v)
 
-    return {"data": res}
+    return {"body": res}
