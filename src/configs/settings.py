@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     APP_PORT: int
     DASHBOARDS_SERVICE_URL: str
     API_KEY: str
+    PRIVATE_KEY: str
 
     class Config:
         env_file = ".env"
