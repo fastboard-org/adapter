@@ -1,9 +1,12 @@
 import pymongo
+from pymongo import UpdateOne
 from bson.objectid import ObjectId
 
 
 from cachetools import TLRUCache
 import time
+from connections.api_request import make_request
+from bson import Decimal128
 
 INACTIVITY_TIMEOUT = 60 * 5
 
@@ -79,20 +82,89 @@ async def execute_query(
         deleted_count = db.delete_many(filter_body).deleted_count
         res = {"deleted_count": deleted_count}
 
-    if isinstance(res, ObjectId):
-        res = str(res)
+    return parse_response(res)
 
-    if isinstance(res, dict):
-        for k, v in res.items():
+
+async def get_embeddings(query: str, api_key: str):
+    url = "https://api.openai.com/v1/embeddings"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}",
+    }
+    response = await make_request(
+        url, headers, "POST", {"input": query, "model": "text-embedding-ada-002"}
+    )
+    return response
+
+
+async def bulk_update(connection_string: str, collection: str, updates: dict):
+    db = get_mongo_client(connection_string).get_database()[collection]
+    operations = []
+    for id, update in updates.items():
+        # set updates to a field called embedding
+        operations.append(UpdateOne({"_id": id}, {"$set": {"embedding": update}}))
+    res = {"data": db.bulk_write(operations).bulk_api_result}
+    return res
+
+
+async def execute_vector_search(
+    connection_string: str,
+    api_key: str,
+    collection: str,
+    query: str,
+    limit: int,
+    num_candidates: int,
+    index_field: str = "fastboard_index",
+    path: str = "embedding",
+):
+    db = get_mongo_client(connection_string).get_database()[collection]
+
+    query_vector = await get_embeddings(query, api_key)
+
+    res = list(
+        db.aggregate(
+            [
+                {
+                    "$vectorSearch": {
+                        "queryVector": query_vector["body"]["data"][0]["embedding"],
+                        "path": path,
+                        "limit": limit,
+                        "numCandidates": num_candidates,
+                        "index": index_field,
+                    }
+                },
+                {"$project": {"embedding": 0}},
+            ]
+        )
+    )
+
+    return parse_response(res)
+
+
+def parse_response(response):
+    if isinstance(response, ObjectId):
+        response = str(response)
+    if isinstance(response, Decimal128):
+        response = Decimal128.to_decimal(response)
+
+    if isinstance(response, dict):
+        for k, v in response.items():
             if isinstance(v, ObjectId):
-                res[k] = str(v)
-    elif isinstance(res, list):
-        for item in res:
+                response[k] = str(v)
+            if isinstance(v, Decimal128):
+                response[k] = Decimal128.to_decimal(v)
+
+    elif isinstance(response, list):
+        for item in response:
             if isinstance(item, ObjectId):
-                res[res.index(item)] = str(item)
+                response[response.index(item)] = str(item)
+            if isinstance(item, Decimal128):
+                response[response.index(item)] = Decimal128.to_decimal(item)
             if isinstance(item, dict):
                 for k, v in item.items():
                     if isinstance(v, ObjectId):
                         item[k] = str(v)
+                    if isinstance(v, Decimal128):
+                        item[k] = Decimal128.to_decimal(v)
 
-    return {"body": res}
+    return {"body": response}
