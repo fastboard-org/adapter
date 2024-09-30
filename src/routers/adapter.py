@@ -14,6 +14,15 @@ def get_query_service():
     return service
 
 
+@AdapterRouter.post("/embeddings/{query_id}")
+async def create_embeddings(
+    query_id: str,
+    index_field: str,
+    service: QueryService = Depends(get_query_service),
+):
+    return await service.create_embeddings(query_id, index_field)
+
+
 @AdapterRouter.post("/execute/{query_id}")
 async def execute_query(
     query_id: str,
