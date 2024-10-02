@@ -214,18 +214,22 @@ class QueryService:
                 tokens = [len(enc.encode(text)) for text in query_texts]
                 total_tokens = sum(tokens)
                 print(f"Total tokens: {total_tokens}")
-                # The input parameter may not take a list longer than 2048 elements (chunks of text).
-                # The total number of tokens across all list elements of the input parameter cannot exceed 1,000,000. (Because the rate limit is 1,000,000 tokens per minute.)
-                # Each individual array element (chunk of text) cannot be more than 8191 tokens.
+                # The input parameter may not take a list longer than 2048 elements
+                # (chunks of text).
+                # The total number of tokens across all list elements of the input
+                # parameter cannot exceed 1,000,000. (Because the rate limit is
+                # 1,000,000 tokens per minute.)
+                # Each individual array element (chunk of text) cannot be more
+                # than 8191 tokens.
                 if total_tokens > 1000000:
-                    print(f"Total tokens > 1M")
+                    print("Total tokens > 1M")
                     batch_size = 2048
                     n_batches = len(query_texts) // batch_size + 1
                     embeddings = []
                     print(f"n_batches: {n_batches}")
                     for i in range(n_batches):
                         print(f"Batch {i}")
-                        batch = query_texts[i * batch_size : (i + 1) * batch_size]
+                        batch = query_texts[i * batch_size: (i + 1) * batch_size]
                         embeddings_response = openai_client.embeddings.create(
                             input=batch, model=model
                         )
@@ -237,7 +241,7 @@ class QueryService:
                         id = document["_id"]
                         update_dict[id] = embeddings[i].embedding
                 else:
-                    print(f"Total tokens <= 1M")
+                    print("Total tokens <= 1M")
                     embeddings_response = openai_client.embeddings.create(
                         input=query_texts, model=model
                     )
