@@ -229,7 +229,7 @@ class QueryService:
                     print(f"n_batches: {n_batches}")
                     for i in range(n_batches):
                         print(f"Batch {i}")
-                        batch = query_texts[i * batch_size: (i + 1) * batch_size]
+                        batch = query_texts[i * batch_size : (i + 1) * batch_size]
                         embeddings_response = openai_client.embeddings.create(
                             input=batch, model=model
                         )
