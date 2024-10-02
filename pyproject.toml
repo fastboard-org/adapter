@@ -31,7 +31,7 @@ exclude = ["docs.py"]
 # E203 whitespace before ':'
 # because black does that :P
 pyflakes = ["+*"]
-pycodestyle = ["+*", "-W503"]
+pycodestyle = ["+*", "-W503", "-E203"]
 
 
 
