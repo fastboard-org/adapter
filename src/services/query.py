@@ -200,15 +200,13 @@ class QueryService:
 
                 # for each document, get the embeddings for the index_field
                 update_dict = {}
-                for document in documents["body"]:
+                query_texts = [document[index_field] for document in documents["body"]]
+                embeddings = openai_client.embeddings.create(
+                    input=query_texts, model=model
+                ).data
+                for i, document in enumerate(documents["body"]):
                     id = document["_id"]
-                    query_text = document[index_field]
-                    embeddings = (
-                        openai_client.embeddings.create(input=query_text, model=model)
-                        .data[0]
-                        .embedding
-                    )
-                    update_dict[id] = embeddings
+                    update_dict[id] = embeddings[i].embedding
 
                 # update the document with the new field "embedding"
                 response = await self.repository.patch_all_documents_field(
