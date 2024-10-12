@@ -2,11 +2,11 @@ import pymongo
 from pymongo import UpdateOne
 from bson.objectid import ObjectId
 
-
 from cachetools import TLRUCache
 import time
 from connections.api_request import make_request
 from bson import Decimal128
+from lib.object_id import replace_objectid_strings
 
 INACTIVITY_TIMEOUT = 60 * 5
 
@@ -101,7 +101,7 @@ async def bulk_update(connection_string: str, collection: str, updates: dict):
     db = get_mongo_client(connection_string).get_database()[collection]
     operations = []
     for id, update in updates.items():
-        # set updates to a field called embedding
+        id = replace_objectid_strings(id)
         operations.append(UpdateOne({"_id": id}, {"$set": {"embedding": update}}))
     res = {"data": db.bulk_write(operations).bulk_api_result}
     return res
@@ -143,27 +143,31 @@ async def execute_vector_search(
 
 def parse_response(response):
     if isinstance(response, ObjectId):
-        response = str(response)
+        # response = str(response)
+        response = "ObjectId('" + str(response) + "')"
     if isinstance(response, Decimal128):
         response = Decimal128.to_decimal(response)
 
     if isinstance(response, dict):
         for k, v in response.items():
             if isinstance(v, ObjectId):
-                response[k] = str(v)
+                # response[k] = str(v)
+                response[k] = "ObjectId('" + str(v) + "')"
             if isinstance(v, Decimal128):
                 response[k] = Decimal128.to_decimal(v)
 
     elif isinstance(response, list):
         for item in response:
             if isinstance(item, ObjectId):
-                response[response.index(item)] = str(item)
+                # response[response.index(item)] = str(item)
+                response[response.index(item)] = "ObjectId('" + str(item) + "')"
             if isinstance(item, Decimal128):
                 response[response.index(item)] = Decimal128.to_decimal(item)
             if isinstance(item, dict):
                 for k, v in item.items():
                     if isinstance(v, ObjectId):
-                        item[k] = str(v)
+                        # item[k] = str(v)
+                        item[k] = "ObjectId('" + str(v) + "')"
                     if isinstance(v, Decimal128):
                         item[k] = Decimal128.to_decimal(v)
 
